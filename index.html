@@ -166,7 +166,6 @@
         pickupSelect.disabled = true;
         deliveryInput.disabled = true;
 
-        // Обработчик сброса формы
         if (form) {
           form.addEventListener("reset", () => {
             setTimeout(updateTotalPrice, 0); // Ждем, пока браузер сбросит значения
