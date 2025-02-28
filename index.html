@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Lab1</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Подтвердите заказ</h1>
+        <form action="">
+            <div class="form-item product">
+                <label class="checkbox">
+                    <input type="checkbox" name="item1">
+                </label>
+                <div class="media">
+                    <img src="img/item1.jpg" alt="">
+                    <div class="media-body">
+                        <div class="media-header">
+                            <h2>Набор №1</h2>
+                            <p class="price">1250р</p>
+                        </div>
+                        <div class="counter-block">
+                            <label class="counter">
+                                <input type="number" name="item1_count" value="0">
+                            </label>
+                            <button type="button" class="button increase">+</button>
+                            <button type="button" class="button decrease">-</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-item product">
+                <label class="checkbox">
+                    <input type="checkbox" name="item2">
+                </label>
+                <div class="media">
+                    <img src="img/item2.jpg" alt="">
+                    <div class="media-body">
+                        <div class="media-header">
+                            <h2>Набор №2</h2>
+                            <p class="price">2250р</p>
+                        </div>
+                        <div class="counter-block">
+                            <label class="counter">
+                                <input type="number" name="item2_count" value="0">
+                            </label>
+                            <button type="button" class="button increase">+</button>
+                            <button type="button" class="button decrease">-</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-item">
+                <label>
+                    Ваше имя:
+                    <input type="text" name="customer_name">
+                </label>
+                <label>
+                    Ваш телефон:
+                    <input type="tel" name="customer_tel">
+                </label>
+            </div>
+            <div class="form-item">
+                <label class="radio">
+                    <input type="radio" name="delivery_method" value="pickup">
+                    Самовывоз
+                </label>
+                <label class="radio">
+                    <input type="radio" name="delivery_method" value="delivery">
+                    Доставка
+                </label>
+            </div>
+            <div class="form-item">
+                <label>
+                    Адрес самовывоза
+                    <select name="pickup_address">
+                        <option value="address1">Адрес 1</option>
+                        <option value="address2">Адрес 2</option>
+                        <option value="address3">Адрес 3</option>
+                    </select>
+                </label>
+                <label>
+                    Адрес доставки
+                    <input type="text" name="delivery_address">
+                </label>
+            </div>
+
+            <p class="cost">Итого: <span class="cost-num">0</span></p>
+
+            <div class="form-item">
+                <button type="submit" class="button">Подтвердить покупку</button>
+                <button type="reset" class="button">Сбросить</button>
+            </div>
+        </form>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const priceContainer = document.querySelector(".cost-num");
+        const form = document.querySelector("form"); // Находим форму
+
+        function updateTotalPrice() {
+          let total = 0;
+
+          document.querySelectorAll(".product").forEach(item => {
+            const checkbox = item.querySelector("input[type='checkbox']");
+            const input = item.querySelector("input[type='number']");
+            const buttons = item.querySelectorAll(".button");
+            const priceText = item.querySelector(".media-header p")?.textContent.trim();
+            const price = priceText ? parseInt(priceText.replace(/\D/g, ""), 10) : 0;
+            const quantity = parseInt(input.value, 10) || 0;
+
+            const isEnabled = checkbox.checked;
+            input.disabled = !isEnabled;
+            buttons.forEach(button => button.disabled = !isEnabled);
+
+            if (isEnabled) {
+              total += price * quantity;
+            }
+          });
+
+          priceContainer.textContent = `${total}р`;
+        }
+
+        function updateQuantity(button, increment) {
+          const counterBlock = button.closest(".counter-block");
+          if (!counterBlock) return;
+
+          const input = counterBlock.querySelector("input[type='number']");
+          if (!input) return;
+
+          let value = parseInt(input.value, 10) || 0;
+          value = Math.max(0, value + increment);
+          input.value = value;
+
+          updateTotalPrice();
+        }
+
+        document.querySelectorAll(".form-item input[type='checkbox']").forEach(checkbox => {
+          checkbox.addEventListener("change", updateTotalPrice);
+        });
+
+        document.querySelectorAll(".increase").forEach(button => {
+          button.addEventListener("click", () => updateQuantity(button, 1));
+        });
+
+        document.querySelectorAll(".decrease").forEach(button => {
+          button.addEventListener("click", () => updateQuantity(button, -1));
+        });
+
+        const radioButtons = document.querySelectorAll("input[name='delivery_method']");
+        const pickupSelect = document.querySelector("select[name='pickup_address']");
+        const deliveryInput = document.querySelector("input[name='delivery_address']");
+
+        function toggleFields() {
+          const selectedValue = document.querySelector("input[name='delivery_method']:checked")?.value;
+
+          pickupSelect.disabled = selectedValue !== "pickup";
+          deliveryInput.disabled = selectedValue !== "delivery";
+        }
+
+        radioButtons.forEach(radio => {
+          radio.addEventListener("change", toggleFields);
+        });
+
+        pickupSelect.disabled = true;
+        deliveryInput.disabled = true;
+
+        // Обработчик сброса формы
+        if (form) {
+          form.addEventListener("reset", () => {
+            setTimeout(updateTotalPrice, 0); // Ждем, пока браузер сбросит значения
+          });
+        }
+
+        updateTotalPrice();
+      });
+    </script>
+</body>
+</html>
